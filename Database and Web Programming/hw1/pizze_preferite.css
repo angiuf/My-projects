@@ -1,0 +1,26 @@
+article{
+	min-height: 67vh;
+	margin-bottom: 10vh;
+}
+
+#pizze_pref{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+#pizze_pref div.content {
+    width: 65%;
+    margin: 20px 4%;
+}
+
+#pizze_pref p{
+    display: flex;
+    justify-content: space-between;
+}
+
+#pizze_pref h3{
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+    width: 100%;
+}

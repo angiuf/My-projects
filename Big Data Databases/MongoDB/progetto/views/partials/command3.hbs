@@ -1,0 +1,28 @@
+<!-- 3 QUERY -->
+<div class="col-sm">
+    <div class="card mb-2">
+        <div class="card-header" style="background-color: #84a98c; color: white; font-weight: bold">
+            3. Delete an inconsistent certificate
+        </div>
+        <div class="card-body">
+            <div class="input-group">
+                <div class="container-fluid p-0 mb-2">
+                    Insert the fiscal code of the person associated to the certificate you want to delete.
+                </div>
+                <form class="form-inline mb-0" action="/c3" method="POST">
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1Fiscal" aria-describedby="basic-addon2" placeholder="Fiscal code" name="c3_fiscal">
+                    </div>
+                    <div class="input-group-append ">
+                        <button type="submit" class="btn btn-outline-secondary">Delete</button>
+                    </div>
+                </form>
+            </div>
+            {{#if post.outDiv_command3}}
+                <div class="container-fluid mt-2 px-1 bg-light border border-2 rounded" style="display: block">
+                    {{post.outDiv_command3}}
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>

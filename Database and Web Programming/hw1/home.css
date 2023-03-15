@@ -1,0 +1,521 @@
+body {
+    margin: 0;
+}
+
+a{
+    text-decoration: none;
+    color: white;
+}
+
+nav {
+    background-color: orangered;
+    height: 10vh;
+    width: 100vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0%;
+    left: 0%;
+    z-index: 3;
+}
+
+nav .left{
+    display: flex;
+    width: 80%;
+    height: 100%;
+    align-items: center;
+}
+
+.logo {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3em;
+    color: white;
+    padding-right: 6%;
+    padding-left: 1%;
+}
+
+#logo_2 {
+    display: none;
+}
+
+@media (max-width:500px) {
+    #logo_1 {
+        display: none;
+    }
+
+    #logo_2 {
+        display: block;
+        padding-right: 5%;
+    }
+}
+
+#links {
+    height: 100%;
+    font-size: 1.5em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+@media (max-width: 500px) {
+    #links {
+        font-size: 1em;
+    }
+}
+
+#links a {
+    padding-top: calc((10vh - 29.2px) / 2);
+    padding-bottom: calc((10vh - 29.2px) / 2);
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+@media (max-width: 500px) {
+    #links a {
+        padding-top: calc((10vh - 14.8px) / 2);
+        padding-bottom: calc((10vh - 14.8px) / 2);
+        padding-left: 5%;
+        padding-right: 5%;
+    }
+  }
+
+nav a:hover, 
+.content h1 a:hover {
+    background-color: white;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+nav img{
+    cursor: pointer;
+}
+
+div.right {
+    height: 100%;
+    width: 18%;
+    text-align: end;
+    margin-right: 2%;
+}
+
+div.right a:hover{
+    background-color: orangered;
+}
+
+div.right img{
+    height: 60%;
+    margin-top: calc((10vh - 6vh) / 2);
+    margin-left: 2%;
+    margin-right: 2%;
+}
+
+div.right .point {
+    height: 6px;
+    width: 6px;
+    background-color: white;
+    border-radius: 100%;
+    margin: 0 4px;
+    display: none;
+}
+
+@media (max-width: 500px) {
+    div.right img{
+        display: none;
+    }
+
+    div.right .point {
+        display: block;
+    }
+
+    div.right {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+  }
+
+#profile_block {
+    background-color: white;
+    position: absolute;
+    top: calc(10vh + 5px);
+    right: 20px;
+
+    width: 10vw;
+    min-width: 120px;
+    z-index: 5;
+}
+
+#profile_block h3, #profile_block h6{
+    color: orangered;
+    font-family: 'Montserrat', sans-serif;
+    margin-left: 20px;
+}
+
+#profile_block h3{
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+#profile_block h6 a{
+    text-decoration: none;
+    color: orangered;
+}
+
+header {
+    height: 500px;
+    width: 100%;
+    margin-top: 10vh;
+    position: relative;
+    background-image: url("images/pizza.jpg");
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#header_center {
+    z-index: 1;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+header h1{
+    font-size: 2em;
+    font-style: italic;
+    text-align: left;
+    margin-bottom: 10px;
+    z-index: 1;
+}
+
+#search_box {
+    height: 50px;
+    width: 40vw;
+    background-color: whitesmoke;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;    
+    border-radius: 5px;
+    border: 1px solid grey;
+    z-index: 1;
+    padding: 2.5%;
+    position: relative;
+}
+
+
+.content p,
+header h1,
+.content h1 a,
+.footer_info,
+#links {
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+}
+
+#search, #search_box, .lista_preferiti h1, article h1{
+    font-family: 'Montserrat', sans-serif;
+    color: black;
+}
+
+#search, .content p{
+    padding: 2.5%;
+}
+
+#search {
+    position: absolute;
+    left: 0%;
+    top: 2.5%;
+    z-index: 3;
+}
+
+@media (max-width: 500px) {
+    header h1 {
+        top: 38%;
+    }
+
+    #search_box {
+        width: 80vw;
+    }    
+}
+
+header .overlay {
+    background-color: rgba(0, 0, 0, 0.3);
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    height: 100%;
+    width: 100%;
+}
+
+article{
+    width: 80%;
+    margin-top: 15vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hidden {
+    display: none;
+}
+
+#lista_pizzerie, #lista_preferiti div {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+#lista_pizzerie {
+    margin: 5% 0px;
+}
+
+#lista_preferiti {
+    margin: 5% 0px;
+}
+
+#lista_preferiti div {
+    justify-content: flex-start;
+}
+
+
+div.content {
+    width: 25%;
+    margin: 20px 4%;
+}
+
+div.big {
+    min-width: 300px;
+}
+
+#lista_preferiti div .content {
+    width: 18%;
+    min-width: 170px;
+    margin: 10px 1%;
+}
+
+.content .blocco_imm{
+    width: 100%;
+    border-radius: 2px;
+    position: relative;
+}
+
+.content .blocco_imm img{
+    width: 100%;
+}
+
+.content .blocco_imm .favorite_icon {
+    height: 27px;
+    width: 30px;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    cursor: pointer;
+}
+
+.content h1 {
+    margin-top: -8%;
+    margin-bottom: 30px;
+    height: 12%;
+    width: 100%;
+    position: relative;
+    top: 4%;
+}
+
+.content h1 a{
+    background-color: orangered;
+    font-size: 1.5em;
+    margin-left: 5%;
+    padding: 2%;
+    border-radius: 2px;
+}
+
+#lista_preferiti div .content h1 a{
+    font-size: 1em;
+}
+
+@media (max-width: 500px) {
+    .content h1 a {
+        font-size: 1em;
+    }
+
+    .content h1 {
+        margin-bottom: 0px;
+    }
+}
+
+.content p{
+    margin-top: 30px;
+    padding: 2%;
+    color: black;
+}
+
+.arrow {
+    height: 20px;
+    width: 20px;
+    margin-top: 2%;
+    margin-left: 8%;
+    cursor: pointer;
+}
+
+footer {
+    height: 18vh;
+    background-color: darkslategray;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer_info {
+    display: inline-block;
+    font-size: 1.5em;
+    margin-left: 1%;
+    line-height: 5vh;
+}
+
+.footer_social {
+    margin: 2%;
+    height: 6vh;
+    width: 28vh;
+}
+
+.footer_social img{
+    height: 6vh;
+    margin: 5%;
+    cursor: pointer;
+}
+
+/*BEERS*/
+#birre, #nutr_cont{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+
+    margin-top: 40px;
+    margin-bottom: 60px;
+}
+
+div.container {
+    width: 250px;
+    margin: 0 2%;
+}
+
+div.container div.title{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+div.container div.title h1{
+    background-color: orangered;
+    color: white;
+    padding: 3px;
+    border-radius: 2px;
+
+    font-size: 1.5em;
+    margin-right: 20px;
+}
+
+.container a{
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+    text-decoration: none;
+}
+
+.container a:hover {
+    color: black;
+}
+
+div.container div.title h3{
+    padding-bottom: 3px;
+}
+
+div.container .img{
+    height: 30vh;
+}
+
+div.container h3{
+    font-family: 'Montserrat', sans-serif;
+
+    margin-top: 0px;
+}
+
+div.container p {
+    font-family: 'Montserrat', sans-serif;
+}
+
+/*Valori nutrizionali*/
+#val_nutr form {
+    display: flex;
+    justify-content: space-between;
+}
+
+#val_nutr_tit {
+    font-size: 1.5em;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+}
+
+#cerca_val_nutr {
+    font-family: 'Montserrat', sans-serif;
+    height: 40px;
+    width: 30vw;
+}
+
+#submit {
+    background-color: orangered;
+    color: white;
+    height: 40px;
+    width: 50px;
+    cursor: pointer;
+
+    border: 0px;
+}
+
+
+#nutr_cont table{
+    width: 100%;
+}
+
+#nutr_cont table {
+    font-size: 1.1em;
+}
+
+#nutr_cont th {
+    color: orangered;
+}
+
+#nutr_cont td {
+    text-align: center;
+}
+
+#nutr_cont {
+    font-family: 'Montserrat', sans-serif;
+}
+
+#nutr_cont div.container {
+    margin-top: 30px;
+}
+
+#vai_a_carrello{
+    position: fixed;
+    bottom: 15vh;
+    right: 7vw;
+    z-index: 2;
+
+    padding: 10px;
+    border-radius: 2px;
+    background-color: orangered;
+    color: white;
+
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+#vai_a_carrello h4{
+    margin: 5px 15px;
+}
+
+#vai_a_carrello:hover{
+    background-color: white;
+    color: black;
+}

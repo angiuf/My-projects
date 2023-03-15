@@ -1,0 +1,28 @@
+<!-- 0 QUERY -->
+<div class="col-sm">
+    <div class="card mb-2">
+        <div class="card-header" style="background-color: #354f52; color: white; font-weight: bold">
+            0. Define validity of a certificate
+        </div>
+        <div class="card-body">
+            <div class="input-group">
+                <div class="container-fluid p-0 mb-2">
+                    After inserting the personal fiscal code and a reference date, there will be displayed if you own a valid certificate.</br></br>
+                </div>
+                <form class="form-inline mb-0" action="/q0" method="POST">
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="fiscalCode" aria-describedby="basic-addon2" placeholder="Fiscal code" name="fiscal_code">
+                    </div>
+                    <div class="input-group-append ">
+                        <button type="submit" class="btn btn-outline-secondary">Check Validity</button>
+                    </div>
+                </form>
+            </div>
+            {{#if post.outDiv_query0}}
+                <div class="container-fluid mt-2 px-1 bg-light border border-2 rounded" style="display: block">
+                    {{breaklines post.outDiv_query0}}
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>

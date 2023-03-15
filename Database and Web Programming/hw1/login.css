@@ -1,0 +1,134 @@
+body{
+    margin: 0px;  
+    display: flex; 
+    justify-content: space-around;
+    align-items: center;     
+}
+
+
+#logo{
+    font-family: 'Poppins', sans-serif;
+    font-size: 3em;
+    color: orangered;
+    padding-left: 10px;
+    margin: 0px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+
+#block{
+    background-image: url('images/pizza_login.jpg');
+    height: 70vh;
+    width: 70vw;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border: 5px solid orangered;
+    border-radius: 2px;
+    display: flex; 
+    justify-content: space-around;
+    align-items: center;   
+}
+
+#form_block {
+    max-width: 40%;
+    background-color: whitesmoke;
+    border: 2px solid gray;
+    border-radius: 5px;
+}
+
+#form_block h3{
+    color: orangered;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5em;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+#form_block h3 span {
+    margin: 10px 10px;
+}
+
+#form_block h3 span:hover {
+    cursor: pointer;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+
+form {
+    font-family: 'Montserrat', sans-serif;
+}
+
+label.invia{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+label.invia input {
+    background-color: orangered;
+    color: white;
+    border-color: orangered;
+    border-style: solid;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+label.invia input:hover {
+    cursor: pointer;
+}
+
+#iscrizione {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+p.invia {
+    width: 90%;
+}
+
+.error{
+    color: red;
+    font-family: 'Roboto Condensed', sans-serif;
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+#succ_iscr {
+    font-family: 'Montserrat', sans-serif;
+    color: orangered;
+    margin-left: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+#iscrizione.hidden {
+    display: none;
+}
+
+input[type=text]:focus{
+    border: 2px solid green;
+}
+
+input[type=password]:focus{
+    border: 2px solid green;
+}
+
+input.in_error{
+    border: 2px solid red;
+}
+
+
+
+

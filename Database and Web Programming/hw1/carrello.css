@@ -1,0 +1,122 @@
+article{
+	min-height: 67vh;
+	margin-bottom: 10vh;
+}
+
+h3{
+    color: orangered;
+    font-family: 'Poppins', sans-serif;
+    text-transform: capitalize;
+}
+
+h2{
+	color: black;
+	font-family: 'Montserrat', sans-serif;
+}
+
+#titolo_carrello{
+	margin-bottom: 10vh;
+}
+
+span{
+	font-family: 'Montserrat', sans-serif;
+}
+
+.nessuna_pizza{
+	margin-left: 20px;
+}
+
+#pizze_carrello{
+	margin-bottom: 10vh;
+}
+
+.ingr_prezzo_p{
+    font-family: 'Montserrat', sans-serif;
+    text-transform: capitalize;
+	margin-block-end: 1em;
+}
+
+.ingredienti{
+	margin-right: 20px;
+}
+
+.prezzo{
+    font-weight: bold;
+}
+
+.delete_icon{
+	height: 20px;
+	margin-left: 20px;
+}
+
+.delete_icon:hover{
+	cursor: pointer;
+}
+
+.prezzo_add{
+	display: flex;
+	align-items: center;
+}
+
+.no-scroll {
+	overflow: hidden;
+}
+
+.pizza_block{
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.ingr_prezzo_p{
+    display: flex;
+    justify-content: space-between;
+}
+
+.solid{
+	border-top: 1px solid grey;
+	width: 85%;
+}
+
+.qty_block{
+	margin-left: 20px;
+	margin-right: 20px;
+	display: flex;
+	align-items: center;
+}
+
+.qty_block img{
+	height: 1em;
+}
+
+#completa_ordine{
+	display: flex;
+	justify-content: space-between;
+}
+
+.button{
+	background-color: orangered;
+	color: white;
+	font-family: 'Montserrat', sans-serif;
+	font-weight: bold;
+	border: none;
+	padding: 5px;
+	border-radius: 2px;
+}
+
+.button:hover{
+	cursor: pointer;
+}
+
+.button:active{
+	background-color: white;
+	color: black
+}
+
+#completa_ordine.hidden{
+	display: none;
+}
+
+#totale{
+	text-align: right;
+}

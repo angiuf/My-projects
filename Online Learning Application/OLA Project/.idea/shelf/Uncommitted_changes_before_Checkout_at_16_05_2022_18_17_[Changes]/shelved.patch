@@ -1,0 +1,67 @@
+Index: OLA-Project/Environment_Pricing/Environment_Pricing.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/OLA-Project/Environment_Pricing/Environment_Pricing.py b/OLA-Project/Environment_Pricing/EnvironmentPricing.py
+rename from OLA-Project/Environment_Pricing/Environment_Pricing.py
+rename to OLA-Project/Environment_Pricing/EnvironmentPricing.py
+--- a/OLA-Project/Environment_Pricing/Environment_Pricing.py	
++++ b/OLA-Project/Environment_Pricing/EnvironmentPricing.py	
+@@ -18,19 +18,16 @@
+         self.lambda_secondary = lambda_secondary  # fixed probability to observe the second secondary product
+ 
+     def round_single_day(self, n_daily_users, alpha_ratio, arms_pulled, class_probability):
+-        daily_reward = 0
++        daily_reward = []
+         effective_users = 0
+ 
+         for u in range(0,n_daily_users):
+             reward_single_cust = self.round_single_customer(alpha_ratio, arms_pulled, class_probability)
+             if reward_single_cust != -1:
+-                daily_reward += reward_single_cust
++                daily_reward.append(reward_single_cust)
+                 effective_users += 1
+ 
+-        if effective_users == 0:
+-            return 0.0
+-        else:
+-            return daily_reward / effective_users
++        return daily_reward, effective_users
+ 
+ 
+     # Returns the reward of a single product bought
+Index: OLA-Project/Environment_Pricing/GreedyAlgorithm.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import numpy as np\r\n\r\nclass GreedyAlgorithm():\r\n    def __init__(self, prices):\r\n        self.prices = prices\r\n\r\n    def optimization_algorithm(self):\r\n        price_arm = np.zeros(5)\r\n        rewards = np.array([])\r\n        while True:\r\n            prec_rewards = calculate_reward(price_arm)\r\n            for i in range(0,5):\r\n                add_price = np.zeros(5)\r\n                add_price[i] = 1\r\n                rewards[i] = calculate_reward(price_arm + add_price) #Control on index exciding columns\r\n            idx = np.argmax(rewards)\r\n            if rewards[idx] <= prec_reward:\r\n                return price_arm\r\n            else:\r\n                if price_arm[idx] != 3:\r\n                    price_arm[idx] += 1\r\n
+===================================================================
+diff --git a/OLA-Project/Environment_Pricing/GreedyAlgorithm.py b/OLA-Project/Environment_Pricing/GreedyAlgorithm.py
+--- a/OLA-Project/Environment_Pricing/GreedyAlgorithm.py	
++++ b/OLA-Project/Environment_Pricing/GreedyAlgorithm.py	
+@@ -1,14 +1,16 @@
+ import numpy as np
++from EnvironmentPricing import *
+ 
+ class GreedyAlgorithm():
+-    def __init__(self, prices):
++    def __init__(self, prices, env):
+         self.prices = prices
++        self.env = env
+ 
+     def optimization_algorithm(self):
+         price_arm = np.zeros(5)
+         rewards = np.array([])
+         while True:
+-            prec_rewards = calculate_reward(price_arm)
++            prec_rewards = env.round_single_day(1000, alpha_ratio, arms_pulled, class_probability)
+             for i in range(0,5):
+                 add_price = np.zeros(5)
+                 add_price[i] = 1
+@@ -19,3 +21,6 @@
+             else:
+                 if price_arm[idx] != 3:
+                     price_arm[idx] += 1
++
++
++

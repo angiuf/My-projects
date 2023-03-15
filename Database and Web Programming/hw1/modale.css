@@ -1,0 +1,97 @@
+#modale {
+	position: fixed;
+	top: 10vh;
+	left: 0;
+	height: 90vh;
+	max-height: 90vh;
+	width: 100%;
+	
+	background-color: rgba(0, 0, 0, 0.7);
+	z-index: 2;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+
+}
+
+#modale.hidden{
+	display: none;
+}
+
+#menu_block {
+	height: 70vh;
+    width: 70vw;
+    background-color: white;
+	border: 3px solid orangered;
+	margin-block-start: 1em;
+
+	overflow-y: auto;
+}
+
+#menu_block h3{
+    color: orangered;
+    font-family: 'Poppins', sans-serif;
+    text-transform: capitalize;
+}
+
+#menu_block .ingr_prezzo_p{
+    font-family: 'Montserrat', sans-serif;
+    text-transform: capitalize;
+	margin-block-end: 1em;
+}
+
+#menu_block .ingredienti{
+	margin-right: 20px;
+}
+
+#menu_block .prezzo{
+    font-weight: bold;
+}
+
+#menu_block .add_icon{
+	height: 20px;
+	margin-left: 20px;
+}
+
+#menu_block .add_icon:hover{
+	cursor: pointer;
+	background-color: white;
+	color: white;
+}
+
+.prezzo_add{
+	display: flex;
+	align-items: center;
+}
+
+.no-scroll {
+	overflow: hidden;
+}
+
+.pizza_block{
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.ingr_prezzo_p{
+    display: flex;
+    justify-content: space-between;
+}
+
+.solid{
+	border-top: 1px solid grey;
+	width: 90%;
+}
+
+.qty_block{
+	margin-left: 20px;
+	margin-right: 20px;
+	display: flex;
+	align-items: center;
+}
+
+.qty_block img{
+	height: 1em;
+}

@@ -1,0 +1,45 @@
+.info{
+    display: flex;
+    justify-content: space-between;
+}
+
+.info span{
+    color: orangered;
+}
+
+.info img{
+    height: 20px;
+    margin-left: 20px;
+}
+
+.info .blocco_totale{
+    display: flex;
+    align-items: center;
+}
+
+.info .blocco_totale span{
+    color: black;
+    font-weight: bold;
+}
+
+.pizze{
+    margin-bottom: 10vh;
+}
+
+.nessun_ordine{
+    margin-left: 20px;
+}
+
+#titolo_ordini{
+    margin-bottom: 10vh;
+}
+
+.blocco_ordine{
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.blocco_ordine img:hover{
+    cursor: pointer;
+}

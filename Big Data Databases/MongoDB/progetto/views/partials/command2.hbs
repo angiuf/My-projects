@@ -1,0 +1,91 @@
+<!-- 2 QUERY -->
+<div class="col-sm">
+    <div class="card mb-2">
+        <div class="card-header" style="background-color: #84a98c; color: white; font-weight: bold">
+            2. Insert a new test covid certificate.
+        </div>
+        <div class="card-body">
+            <div class="input-group">
+                <div class="container-fluid p-0 mb-2">
+                    Insert fiscal code, name, surname, gender ("M" or "F"), address, city, phone number, email and emergency contact of the person that carried out the COVID test, finally specify the result ("Negative" or "Positive") and the date of the test. For simplicity, it is assumed that the application can derive any other needed information, such as data about the authorized body and the medical personnel.</br></br>
+                </div>
+                <form class="form-inline mb-0" action="/c2" method="POST">
+		<div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Fiscal" aria-describedby="basic-addon2" placeholder="Fiscal code" name="c2_fiscal">
+                    </div>
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Name" aria-describedby="basic-addon2" placeholder="Name" name="c2_name">
+                    </div>
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Surname" aria-describedby="basic-addon2" placeholder="Surname" name="c2_surname">
+                    </div>
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Gender" aria-describedby="basic-addon2" placeholder="Gender" name="c2_gender">
+                    </div>
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Address" aria-describedby="basic-addon2" placeholder="Address" name="c2_address">
+                    </div>
+		<div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2City" aria-describedby="basic-addon2" placeholder="City" name="c2_city">
+                    </div>
+		<div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Phone" aria-describedby="basic-addon2" placeholder="Phone" name="c2_phone">
+                    </div>
+		<div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Email" aria-describedby="basic-addon2" placeholder="E-mail" name="c2_email">
+                    </div>
+		<div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Emergency" aria-describedby="basic-addon2" placeholder="Emergency Contact" name="c2_emergency">
+                    </div>
+		<div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Date" aria-describedby="basic-addon2" placeholder="Test Date" name="c2_date">
+                    </div>
+		<div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Result" aria-describedby="basic-addon2" placeholder="Test Result" name="c2_result">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2IdTest" aria-describedby="basic-addon2" placeholder="Test ID" name="c2_id_test">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2Where" aria-describedby="basic-addon2" placeholder="Test Place" name="c2_test_where">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2PersFC" aria-describedby="basic-addon2" placeholder="Doctor fiscal code" name="c2_pers_fc">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2AuthBodyId" aria-describedby="basic-addon2" placeholder="Authorization body ID" name="c2_auth_body_id">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2AuthBodyName" aria-describedby="basic-addon2" placeholder="Authorization body name" name="c2_auth_body_name">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2AuthBodyDesc" aria-describedby="basic-addon2" placeholder="Authorization body description" name="c2_auth_body_desc">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2AuthBodyLoc" aria-describedby="basic-addon2" placeholder="Authorization body location" name="c2_auth_body_loc">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2AuthBodyType" aria-describedby="basic-addon2" placeholder="Authorization body type" name="c2_auth_body_type">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2AuthBodyDep" aria-describedby="basic-addon2" placeholder="Authorization body department" name="c2_auth_body_dep">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2AuthBodyAddr" aria-describedby="basic-addon2" placeholder="Authorization body address" name="c2_auth_body_addr">
+                    </div>
+        <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c2AuthBodyCity" aria-describedby="basic-addon2" placeholder="Authorization body city" name="c2_auth_body_city">
+                    </div>
+                    <div class="input-group-append ">
+                        <button type="submit" class="btn btn-outline-secondary">Insert</button>
+                    </div>
+                </form>
+            </div>
+            {{#if post.outDiv_command2}}
+                <div class="container-fluid mt-2 px-1 bg-light border border-2 rounded" style="display: block">
+                    {{post.outDiv_command2}}
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>

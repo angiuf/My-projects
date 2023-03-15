@@ -1,0 +1,28 @@
+<!-- 5 QUERY -->
+<div class="col-sm">
+    <div class="card mb-2">
+        <div class="card-header" style="background-color: #52796f; color: white; font-weight: bold">
+            5. Find the last 20 certificates issued by a specific Authority.
+        </div>
+        <div class="card-body">
+            <div class="input-group">
+                <div class="container-fluid p-0 mb-2">
+                    Insert which authority you want to check and click on the button "Calculate" to find which are the last 20 certificate issued by the selected authority.
+                </div>
+                <form class="form-inline mb-0" action="/q5" method="POST">
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="authorityID" aria-describedby="basic-addon2" placeholder="Authority body ID" name="authority_id">
+                    </div>
+                    <div class="input-group-append ">
+                        <button type="submit" class="btn btn-outline-secondary">Calculate</button>
+                    </div>
+                </form>
+            </div>
+            {{#if post.outDiv_query5}}
+                <div class="container-fluid mt-2 px-1 bg-light border border-2 rounded" style="display: block">
+                    {{breaklines post.outDiv_query5}}
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+article{
+	min-height: 67vh;
+	margin-bottom: 10vh;
+}
+
+#pizze{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+#pizze .content {
+    width: 25%;
+    min-width: 170px;
+    margin: 10px 1%;
+}
+
+#pizze .content h1{
+    font-size: 1em;
+}
+
+#modale .prezzo_add{
+    display: flex;
+    justify-content: space-between;
+
+    font-family: 'Montserrat', sans-serif;
+}
+
+#modale .div2{
+    display: flex;
+    align-items: center;
+}

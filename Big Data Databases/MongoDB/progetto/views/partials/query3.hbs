@@ -1,0 +1,28 @@
+<!-- 3 QUERY -->
+<div class="col-sm">
+    <div class="card mb-2">
+        <div class="card-header" style="background-color: #52796f; color: white; font-weight: bold">
+            3. Find all people vaccinated with a specific lot
+        </div>
+        <div class="card-body">
+            <div class="input-group">
+                <div class="container-fluid p-0 mb-2">
+                    After inserting the lot of the vaccine used, there will be displayed all the people that were vaccinated with that specific vaccine.
+                </div>
+                <form class="form-inline mb-0" action="/q3" method="POST">
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="vaccineLot" aria-describedby="basic-addon2" placeholder="Vaccine lot" name="vaccine_lot">
+                    </div>
+                    <div class="input-group-append ">
+                        <button type="submit" class="btn btn-outline-secondary">Calculate</button>
+                    </div>
+                </form>
+            </div>
+            {{#if post.outDiv_query3}}
+                <div class="container-fluid mt-2 px-1 bg-light border border-2 rounded" style="display: block">
+                    {{breakilines post.outDiv_query3}}
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>

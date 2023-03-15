@@ -1,0 +1,104 @@
+{{>header}}
+
+<div class="container-fluid bg-light d-flex justify-content-center">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light ps-5 pe-5 ">
+          <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+              <div class="navbar-nav">
+                <a id="query" class="nav-link active me-5" aria-current="page" href="#">Query</a>
+                <a id="command" class="nav-link me-5" href="#">Command</a>
+	            <a id="about" class="nav-link" href="#">About</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+
+<div id="page_query" class="row justify-content-center mt-3 mx-0 ">
+    <div class="row justify-content-center mt-3 mx-0 ">
+        {{>query0}}
+        <div class="w-100"></div>
+        {{>query1}}
+        <div class="w-100"></div>
+        {{>query2}}
+        <div class="w-100"></div>
+        {{>query3}}
+        <div class="w-100"></div>
+        {{>query4}}
+        <div class="w-100"></div>
+        {{>query5}}
+        <div class="w-100"></div>
+    </div>
+</div>
+
+<div id="page_command" style="display:none" class="row justify-content-center mt-3 mx-0 " >
+    <div class="row justify-content-center mt-3 mx-0 ">
+        {{>command1}}
+        <div class="w-100"></div>
+        {{>command2}}
+        <div class="w-100"></div>
+        {{>command3}}
+
+    </div>
+</div>
+
+ <div id="page_about" class="row justify-content-center mt-3 mx-0 ">
+
+            <div class="col-sm">
+              <div class="card mb-4 border-0">
+              <div class="card-header fs-5 fw-bold text-center bg-white border-0">
+                  SYSTEMS AND METHODS FOR BIG AND UNSTRUCTURED DATA 2021-2022<br>Project Work  DELIVERY #2
+                </div>
+                <div class="card-body">
+                  <div class="input-group">
+                    <div class="container-fluid p-0 mb-2 text-center">
+                      <b>TEAM MEMBERS</b> <br>
+                      Christian Onorati - 10616952 <br>
+                      Andrea Giuffrida - 10643540 <br>
+                      Alessandro D'Onofrio - 10864445 <br>
+                      Nicholas Nicolis - 10867841 <br>
+                      Silvia Marino -10688672 <br>
+
+                    </div>
+
+                  </div>
+
+                </div>
+            </div>
+            </div>
+
+        </div>
+
+     <script>
+      const query = document.getElementById("query");
+      const command = document.getElementById("command");
+      const about = document.getElementById("about");
+
+      const page_query = document.getElementById("page_query");
+      const page_command = document.getElementById("page_command");
+      const page_about = document.getElementById("page_about");
+
+      query.addEventListener('click', showQuery);
+      command.addEventListener('click', showCommand);
+      about.addEventListener('click', showAbout);
+
+      function showQuery(){
+        page_query.style.display = 'block';
+        page_command.style.display = 'none';
+      }
+
+      function showCommand(){
+        page_query.style.display = 'none';
+        page_command.style.display = 'block';
+      }
+
+      function showAbout(){
+        page_query.style.display = 'none';
+        page_command.style.display = 'none';
+        page_about.style.display = 'block';
+      }
+    </script>
+

@@ -1,0 +1,79 @@
+<!-- 1 COMMAND -->
+<div class="col-sm">
+    <div class="card mb-2">
+        <div class="card-header" style="background-color: #84a98c; color: white; font-weight: bold">
+            1. Update the certificate with a new vaccination:
+        </div>
+        <div class="card-body">
+            <div class="input-group">
+                <div class="container-fluid p-0 mb-2">
+                    First specify the fiscal code of the person associated to the certificate you want to update. The other fields represent, in order: vaccine ID, lot number, vaccine type, vaccine brand, production date, vaccination date, vaccination place. For simplicity, it is assumed that the application can derive any other needed information, such as data about the authorized body and the medical personnel.</br></br>
+                </div>
+                <form class="form-inline mb-0" action="/c1" method="POST">
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1Fiscal" aria-describedby="basic-addon2" placeholder="Fiscal code" name="c1_fiscal">
+                    </div>
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1idVax" aria-describedby="basic-addon2" placeholder="Vaccine ID" name="c1_idVax">
+                    </div>
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1Lot" aria-describedby="basic-addon2" placeholder="Lot" name="c1_lot">
+                    </div>
+                    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1Type" aria-describedby="basic-addon2" placeholder="Type" name="c1_type">
+                    </div>
+		    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1Brand" aria-describedby="basic-addon2" placeholder="Brand" name="c1_brand">
+                    </div>
+	            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1productionDate" aria-describedby="basic-addon2" placeholder="Production date" name="c1_production_date">
+                    </div>
+		    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1When" aria-describedby="basic-addon2" placeholder="Vaccination date" name="c1_when">
+            </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1Where" aria-describedby="basic-addon2" placeholder="Vaccination place" name="c1_where">
+                    </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1authBody" aria-describedby="basic-addon2" placeholder="Authorized body ID" name="c1_authBody">
+            </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1authBodyName" aria-describedby="basic-addon2" placeholder="Authorized body name" name="c1_authBodyName">
+            </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1authBodyDesc" aria-describedby="basic-addon2" placeholder="Authorized body description" name="c1_authBodyDesc">
+            </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1authBodyLoc" aria-describedby="basic-addon2" placeholder="Authorized body location" name="c1_authBodyLoc">
+            </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1authBodyType" aria-describedby="basic-addon2" placeholder="Authorized body type" name="c1_authBodyType">
+            </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1authBodyDep" aria-describedby="basic-addon2" placeholder="Authorized body department" name="c1_authBodyDep">
+            </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1authBodyAddr" aria-describedby="basic-addon2" placeholder="Authorized body address" name="c1_authBodyAddr">
+            </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1authBodyCity" aria-describedby="basic-addon2" placeholder="Authorized body city" name="c1_authBodyCity">
+            </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1persFC" aria-describedby="basic-addon2" placeholder="Doctor fiscal code" name="c1_persFC">
+            </div>
+            <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="c1nurseFC" aria-describedby="basic-addon2" placeholder="Nurse fiscal code" name="c1_nurseFC">
+            </div>
+                    <div class="input-group-append ">
+                        <button type="submit" class="btn btn-outline-secondary">Update</button>
+                    </div>
+                </form>
+            </div>
+            {{#if post.outDiv_command1}}
+                <div class="container-fluid mt-2 px-1 bg-light border border-2 rounded" style="display: block">
+                    {{post.outDiv_command1}}
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>

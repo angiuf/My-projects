@@ -1,0 +1,31 @@
+<!-- 1 QUERY -->
+<div class="col-sm">
+    <div class="card mb-2">
+        <div class="card-header" style="background-color: #52796f; color: white; font-weight: bold">
+            1. Find the number of people vaccinated per vaccine type.
+        </div>
+        <div class="card-body">
+            <div class="input-group">
+                <div class="container-fluid p-0 mb-2">
+                    When you will click on the button "Calculate" you will se the number of people vaccinated for each vaccine type.
+                </div>
+                <form class="form-inline mb-0" action="/q1" method="POST">
+		    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="dateInf" aria-describedby="basic-addon2" placeholder="Start date" name="date_inf">
+                    </div>
+		    <div class="form-group mr-3">
+                        <input type="text" class="form-control rounded" id="dateSup" aria-describedby="basic-addon2" placeholder="End date" name="date_sup">
+                    </div>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-outline-secondary">Calculate</button>
+                    </div>
+                </form>
+            </div>
+            {{#if post.outDiv_query1}}
+                <div class="container-fluid mt-2 px-1 bg-light border border-2 rounded" style="display: block">
+                    {{breakilines post.outDiv_query1}}
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>

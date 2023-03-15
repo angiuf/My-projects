@@ -1,0 +1,489 @@
+Index: OLA-Project/UCBLearner3.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from Learner import Learner\r\nfrom GreedyAlgorithm import *\r\nimport numpy as np\r\n\r\n\r\nclass UCBLearner3(Learner):\r\n    def __init__(self, model):\r\n        super().__init__(model)\r\n        self.cr_means = np.zeros((self.n_prod, self.n_price))  # means of the conversion rate for each product at each price\r\n        self.conv_widths = np.array([[np.inf for _ in range(self.n_price)] for _ in range(self.n_prod)])  # width for each product and each price, initialized at +inf to explore all arms first\r\n        self.clicks_means = np.zeros((5, 5))  # means of the alpha ratio for each product\r\n\r\n        self.prices = model[\"prices\"]\r\n\r\n        self.model['cr_means'] = self.cr_means  # save conversion rates means in the model\r\n        self.model['ucb_cr'] = self.cr_means + self.conv_widths  # save conversion rates means + widths in the model\r\n        self.model['clicks_means'] = self.clicks_means\r\n        self.n_prod_price = np.zeros((self.n_prod, self.n_price))  # counts number of times a price has been selected for a product\r\n\r\n    def act(self):  # select the arm which has the highest upper confidence bound\r\n        arm_pulled = optimization_algorithm(self.model, False, rates=\"ucb_cr\", clicks='clicks_means')\r\n        return arm_pulled\r\n\r\n    def update(self, arm_pulled, conv_data, clicks_data):\r\n        super().update3(arm_pulled, conv_data, clicks_data)\r\n\r\n        for i in range(self.n_prod):\r\n            self.cr_means[i, arm_pulled[i]] = np.mean(\r\n                self.reward_per_prod_price[i][\r\n                    arm_pulled[i]])  # update the mean of conversion rate of the arm that we pulled\r\n            self.n_prod_price[\r\n                i, arm_pulled[i]] += len(conv_data[i])  # TODO: += len(conv_data[i]) o t? con len(conv_data[i]) sembra meglio\r\n\r\n        for i in range(self.n_prod):\r\n            for j in range(self.n_price):  # update the confidence bound for all arm\r\n                n = self.n_prod_price[i, j]\r\n                if n > 0:\r\n                    self.conv_widths[i, j] = np.sqrt(\r\n                        2 * np.log(self.t) / n)  # TODO: log(t) o log(t) * daily_users?\r\n                else:\r\n                    self.conv_widths[i, j] = np.inf\r\n\r\n        self.model['ucb_cr'] = self.cr_means + self.conv_widths\r\n        self.model['cr_means'] = self.cr_means\r\n\r\n        for i in range(self.n_prod):\r\n            data = np.array(clicks_data)\r\n            sum = np.sum(data[i, :])\r\n            for j in range(self.n_prod):\r\n                if sum == 0:\r\n                    self.clicks_means[i, j] = 0.0\r\n                else:\r\n                    self.clicks_means[i, j] = data[i, j]/sum\r\n\r\n        self.model['clicks_means'] = self.clicks_means\r\n\r\n    def printq(self):\r\n        print(self.quantity_mean)\r\n\r\n    def printalpha(self):\r\n        print(self.alpha_means)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/OLA-Project/UCBLearner3.py b/OLA-Project/UCBLearner3.py
+--- a/OLA-Project/UCBLearner3.py	(revision 4dbbca9f6e95f77127e6a60a14479aedb5c5c648)
++++ b/OLA-Project/UCBLearner3.py	(date 1662476769171)
+@@ -16,6 +16,8 @@
+         self.model['ucb_cr'] = self.cr_means + self.conv_widths  # save conversion rates means + widths in the model
+         self.model['clicks_means'] = self.clicks_means
+         self.n_prod_price = np.zeros((self.n_prod, self.n_price))  # counts number of times a price has been selected for a product
++        self.model_0 = model
++
+ 
+     def act(self):  # select the arm which has the highest upper confidence bound
+         arm_pulled = optimization_algorithm(self.model, False, rates="ucb_cr", clicks='clicks_means')
+Index: OLA-Project/ucb_test.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from UCBLearner1 import *\r\nimport numpy as np\r\nimport matplotlib.pyplot as plt\r\nfrom GenerateEnvironment import *\r\n\r\n\r\ndef main():\r\n    env1, model, class_probability = generate_environment()\r\n    real_conv_rates = model[\"real_conversion_rates\"]\r\n    prices = model[\"prices\"]\r\n\r\n    T = 100 - 4\r\n    daily_user = 1000\r\n\r\n    optimal_arm = optimization_algorithm(model, False)  # pull the optimal arm\r\n    print(\"Optimal_arm: \", optimal_arm)\r\n\r\n    optimal_act_rate = MC_simulation(model, real_conv_rates[range(5), optimal_arm], 5, 10000)\r\n\r\n    optimal_reward = return_reward(model, prices[range(5), optimal_arm],\r\n                                   real_conv_rates[range(5), optimal_arm], optimal_act_rate, model['real_alpha_ratio'], model['real_quantity'])\r\n    print(\"Optimal reward: \", optimal_reward)\r\n\r\n    learner = UCBLearner1(model)\r\n    instant_regret_rew = []\r\n    instant_regret_obs = []\r\n\r\n    for t in range(4):\r\n        arm = [t, t, t, t, t]\r\n        alpha_ratio = env1.alpha_ratio_otd()\r\n        data = env1.round_single_day(daily_user, alpha_ratio, arm, class_probability)\r\n        env_data = conv_data(data)\r\n        learner.update(arm, env_data)\r\n\r\n        act_rate = MC_simulation(model, real_conv_rates[range(5), arm], 5)\r\n        rew = return_reward(model, prices[range(5), arm],\r\n                            real_conv_rates[range(5), arm], act_rate, model['real_alpha_ratio'], model['real_quantity'])\r\n\r\n        obs_reward = 0\r\n        if len(data):\r\n            for i_ in range(len(data)):\r\n                obs_reward += np.sum(data[i_][0])\r\n\r\n            obs_reward /= len(data)\r\n\r\n        print(\"Pulled_arm: \", arm)\r\n\r\n        instant_regret_rew.append(optimal_reward - rew)\r\n        instant_regret_obs.append(optimal_reward - obs_reward)\r\n        print(\"Time: \", t)\r\n\r\n    for t in range(T):\r\n        pulled_arm = learner.act()\r\n        alpha_ratio = env1.alpha_ratio_otd()\r\n        data = env1.round_single_day(daily_user, alpha_ratio, pulled_arm, class_probability)\r\n        env_data = conv_data(data)\r\n        learner.update(pulled_arm, env_data)\r\n\r\n        act_rate = MC_simulation(model, real_conv_rates[range(5), pulled_arm], 5)\r\n        rew = return_reward(model, prices[range(5), pulled_arm],\r\n                            real_conv_rates[range(5), pulled_arm], act_rate, model['real_alpha_ratio'], model['real_quantity'])\r\n\r\n        obs_reward = 0\r\n        if len(data):\r\n            for i in range(len(data)):\r\n                obs_reward += np.sum(data[i][0])\r\n\r\n            obs_reward /= len(data)\r\n\r\n        print(\"Pulled_arm: \", pulled_arm)\r\n\r\n        instant_regret_rew.append(optimal_reward - rew)\r\n        instant_regret_obs.append(optimal_reward - obs_reward)\r\n        print(\"Time: \", t+4)\r\n\r\n    show_results(instant_regret_rew, instant_regret_obs, \"UCB test, first case\")\r\n\r\n\r\nmain()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/OLA-Project/ucb_test.py b/OLA-Project/ucb_test.py
+--- a/OLA-Project/ucb_test.py	(revision 4dbbca9f6e95f77127e6a60a14479aedb5c5c648)
++++ b/OLA-Project/ucb_test.py	(date 1662476769182)
+@@ -9,8 +9,10 @@
+     real_conv_rates = model["real_conversion_rates"]
+     prices = model["prices"]
+ 
+-    T = 100 - 4
+-    daily_user = 1000
++    model_0 = model.copy()
++
++    T = 10 - 4
++    daily_user = 100
+ 
+     optimal_arm = optimization_algorithm(model, False)  # pull the optimal arm
+     print("Optimal_arm: ", optimal_arm)
+@@ -25,55 +27,66 @@
+     instant_regret_rew = []
+     instant_regret_obs = []
+ 
+-    for t in range(4):
+-        arm = [t, t, t, t, t]
+-        alpha_ratio = env1.alpha_ratio_otd()
+-        data = env1.round_single_day(daily_user, alpha_ratio, arm, class_probability)
+-        env_data = conv_data(data)
+-        learner.update(arm, env_data)
++    N_experiments = 4
++
++    R = []
++    for n in range(N_experiments):
++        instant_regret_rew = []
++        instant_regret_obs = []
++        learner.reset()
++        for t in range(4):
++            arm = [t, t, t, t, t]
++            alpha_ratio = env1.alpha_ratio_otd()
++            data = env1.round_single_day(daily_user, alpha_ratio, arm, class_probability)
++            env_data = conv_data(data)
++            learner.update(arm, env_data)
+ 
+-        act_rate = MC_simulation(model, real_conv_rates[range(5), arm], 5)
+-        rew = return_reward(model, prices[range(5), arm],
+-                            real_conv_rates[range(5), arm], act_rate, model['real_alpha_ratio'], model['real_quantity'])
++            act_rate = MC_simulation(model, real_conv_rates[range(5), arm], 5)
++            rew = return_reward(model, prices[range(5), arm],
++                                real_conv_rates[range(5), arm], act_rate, model['real_alpha_ratio'], model['real_quantity'])
+ 
+-        obs_reward = 0
+-        if len(data):
+-            for i_ in range(len(data)):
+-                obs_reward += np.sum(data[i_][0])
++            obs_reward = 0
++            if len(data):
++                for i_ in range(len(data)):
++                    obs_reward += np.sum(data[i_][0])
+ 
+-            obs_reward /= len(data)
++                obs_reward /= len(data)
+ 
+-        print("Pulled_arm: ", arm)
++            print("Pulled_arm: ", arm)
+ 
+-        instant_regret_rew.append(optimal_reward - rew)
+-        instant_regret_obs.append(optimal_reward - obs_reward)
+-        print("Time: ", t)
++            instant_regret_rew.append(optimal_reward - rew)
++            instant_regret_obs.append(optimal_reward - obs_reward)
++            print("Time: ", t)
+ 
+-    for t in range(T):
+-        pulled_arm = learner.act()
+-        alpha_ratio = env1.alpha_ratio_otd()
+-        data = env1.round_single_day(daily_user, alpha_ratio, pulled_arm, class_probability)
+-        env_data = conv_data(data)
+-        learner.update(pulled_arm, env_data)
++        for t in range(T):
++            pulled_arm = learner.act()
++            alpha_ratio = env1.alpha_ratio_otd()
++            data = env1.round_single_day(daily_user, alpha_ratio, pulled_arm, class_probability)
++            env_data = conv_data(data)
++            learner.update(pulled_arm, env_data)
+ 
+-        act_rate = MC_simulation(model, real_conv_rates[range(5), pulled_arm], 5)
+-        rew = return_reward(model, prices[range(5), pulled_arm],
+-                            real_conv_rates[range(5), pulled_arm], act_rate, model['real_alpha_ratio'], model['real_quantity'])
++            act_rate = MC_simulation(model, real_conv_rates[range(5), pulled_arm], 5)
++            rew = return_reward(model, prices[range(5), pulled_arm],
++                                real_conv_rates[range(5), pulled_arm], act_rate, model['real_alpha_ratio'], model['real_quantity'])
+ 
+-        obs_reward = 0
+-        if len(data):
+-            for i in range(len(data)):
+-                obs_reward += np.sum(data[i][0])
++            obs_reward = 0
++            if len(data):
++                for i in range(len(data)):
++                    obs_reward += np.sum(data[i][0])
+ 
+-            obs_reward /= len(data)
++                obs_reward /= len(data)
+ 
+-        print("Pulled_arm: ", pulled_arm)
++            print("Pulled_arm: ", pulled_arm)
+ 
+-        instant_regret_rew.append(optimal_reward - rew)
+-        instant_regret_obs.append(optimal_reward - obs_reward)
+-        print("Time: ", t+4)
++            instant_regret_rew.append(optimal_reward - rew)
++            instant_regret_obs.append(optimal_reward - obs_reward)
++            print("Time: ", t+4)
++        cum_regret_rew = np.cumsum(instant_regret_rew)
++        cum_regret_obs = np.cumsum(instant_regret_obs)
++        R.append(cum_regret_obs)
+ 
+-    show_results(instant_regret_rew, instant_regret_obs, "UCB test, first case")
++
++    show_results(cum_regret_rew, R, "UCB test, first case")
+ 
+ 
+ main()
+Index: OLA-Project/Learner.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>class Learner:\r\n    def __init__(self, model):\r\n        self.t = 0  # time\r\n        self.n_price = model[\"n_price\"]  # number of prices per product\r\n        self.n_prod = model[\"n_prod\"]  # number of products\r\n        self.reward_per_prod_price = [[[] for _ in range(self.n_price)] for _ in\r\n                                      range(self.n_prod)]  # list of list to collect rewards of each single arm (0, 1)\r\n        self.reward_per_prod_alpha = [[] for _ in range(self.n_prod+1)]  # list of list to collect the first product seen by the users\r\n        self.reward_per_quantity = [] # list to collect the number of objects bought by the users\r\n        self.reward_per_clicks = [[0 for _ in range(self.n_prod)] for _ in range(self.n_prod)]\r\n\r\n        self.model_0 = model\r\n        self.model = model\r\n\r\n    # we need two functions: one that sends actions to the environment, the other that collects the obs and\r\n    # updates the inner functioning of the algorithm. Both of this function are specific to the learning algorithm\r\n    # that you're implementing\r\n    def reset(self):  # function to reset everything to 0\r\n        self.__init__(self.model_0)  # reset\r\n\r\n    def act(self):\r\n        pass\r\n\r\n    def update(self, arm_pulled, conv_data):\r\n        self.t += 1\r\n        for i in range(self.n_prod):\r\n            self.reward_per_prod_price[i][arm_pulled[i]].extend(\r\n                conv_data[i])  # Append data for conversion rate for each prod, for each price\r\n\r\n    def update2(self, arm_pulled, conv_data, alpha_data, quantity_data):\r\n        self.t += 1\r\n        for i in range(self.n_prod):\r\n            self.reward_per_prod_price[i][arm_pulled[i]].extend(conv_data[i])  # Append data for conversion rate for each prod, for each price\r\n\r\n        for i in range(self.n_prod+1):\r\n            self.reward_per_prod_alpha[i].extend(alpha_data[i])\r\n\r\n        self.reward_per_quantity.extend(quantity_data)\r\n\r\n    def update3(self, arm_pulled, conv_data, clicks_data):\r\n        self.t += 1\r\n        for i in range(self.n_prod):\r\n            self.reward_per_prod_price[i][arm_pulled[i]].extend(conv_data[i])  # Append data for conversion rate for each prod, for each price\r\n\r\n        for i in range(self.n_prod):\r\n            for j in range(self.n_prod):\r\n                self.reward_per_clicks[i][j] += clicks_data[i][j]
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/OLA-Project/Learner.py b/OLA-Project/Learner.py
+--- a/OLA-Project/Learner.py	(revision 4dbbca9f6e95f77127e6a60a14479aedb5c5c648)
++++ b/OLA-Project/Learner.py	(date 1662476769189)
+@@ -9,14 +9,13 @@
+         self.reward_per_quantity = [] # list to collect the number of objects bought by the users
+         self.reward_per_clicks = [[0 for _ in range(self.n_prod)] for _ in range(self.n_prod)]
+ 
+-        self.model_0 = model
+         self.model = model
+ 
+     # we need two functions: one that sends actions to the environment, the other that collects the obs and
+     # updates the inner functioning of the algorithm. Both of this function are specific to the learning algorithm
+     # that you're implementing
+-    def reset(self):  # function to reset everything to 0
+-        self.__init__(self.model_0)  # reset
++    #def reset(self):  # function to reset everything to 0
++    #    self.__init__(self.model_0)  # reset
+ 
+     def act(self):
+         pass
+Index: OLA-Project/ucb_test2.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from UCBLearner2 import *\r\nimport numpy as np\r\nimport matplotlib.pyplot as plt\r\nfrom GenerateEnvironment import *\r\n\r\n\r\ndef main():\r\n    env1, model, class_probability = generate_environment()\r\n    real_conv_rates = model[\"real_conversion_rates\"]\r\n    prices = model[\"prices\"]\r\n\r\n    T = 100 - 4\r\n    daily_user = 2000\r\n\r\n    optimal_arm = optimization_algorithm(model, False)  # pull the optimal arm\r\n    print(\"Optimal_arm: \", optimal_arm)\r\n\r\n    optimal_act_rate = MC_simulation(model, real_conv_rates[range(5), optimal_arm], 5, 10000)\r\n\r\n    optimal_reward = return_reward(model, prices[range(5), optimal_arm],\r\n                                   real_conv_rates[range(5), optimal_arm], optimal_act_rate, model['real_alpha_ratio'], model['real_quantity'])\r\n    print(\"Optimal reward: \", optimal_reward)\r\n\r\n    learner = UCBLearner2(model)\r\n    instant_regret_rew = []\r\n    instant_regret_obs = []\r\n\r\n    for t in range(4):\r\n        arm = [t, t, t, t, t]\r\n        alpha_ratio = env1.alpha_ratio_otd()\r\n        data = env1.round_single_day(daily_user, alpha_ratio, arm, class_probability)\r\n        cr_data = conv_data(data)\r\n        ar_data = alpha_data(data)\r\n        q_data = quantity_data(data)\r\n        learner.update(arm, cr_data, ar_data, q_data)\r\n\r\n        act_rate = MC_simulation(model, real_conv_rates[range(5), arm], 5)\r\n        rew = return_reward(model, prices[range(5), arm], real_conv_rates[range(5), arm], act_rate,\r\n                            model['real_alpha_ratio'], model['real_quantity'])\r\n\r\n        obs_reward = 0\r\n        if len(data):\r\n            for i_ in range(len(data)):\r\n                obs_reward += np.sum(data[i_][0])\r\n\r\n            obs_reward /= len(data)\r\n\r\n        print(\"Pulled_arm: \", arm)\r\n\r\n        instant_regret_rew.append(optimal_reward - rew)\r\n        instant_regret_obs.append(optimal_reward - obs_reward)\r\n        print(\"Time: \", t)\r\n\r\n    for t in range(T):\r\n        pulled_arm = learner.act()\r\n        alpha_ratio = env1.alpha_ratio_otd()\r\n        data = env1.round_single_day(daily_user, alpha_ratio, pulled_arm, class_probability)\r\n        cr_data = conv_data(data)\r\n        ar_data = alpha_data(data)\r\n        q_data = quantity_data(data)\r\n        learner.update(pulled_arm, cr_data, ar_data, q_data)\r\n\r\n        act_rate = MC_simulation(model, real_conv_rates[range(5), pulled_arm], 5)\r\n        rew = return_reward(model, prices[range(5), pulled_arm], real_conv_rates[range(5), pulled_arm], act_rate,\r\n                            model['real_alpha_ratio'], model['real_quantity'])\r\n\r\n        obs_reward = 0\r\n        if len(data):\r\n            for i in range(len(data)):\r\n                obs_reward += np.sum(data[i][0])\r\n\r\n            obs_reward /= len(data)\r\n\r\n        print(\"Pulled_arm: \", pulled_arm)\r\n\r\n        instant_regret_rew.append(optimal_reward - rew)\r\n        instant_regret_obs.append(optimal_reward - obs_reward)\r\n        print(\"Time: \", t+4)\r\n\r\n    show_results(instant_regret_rew, instant_regret_obs, \"UCB test, second case\")\r\n\r\n\r\nmain()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/OLA-Project/ucb_test2.py b/OLA-Project/ucb_test2.py
+--- a/OLA-Project/ucb_test2.py	(revision 4dbbca9f6e95f77127e6a60a14479aedb5c5c648)
++++ b/OLA-Project/ucb_test2.py	(date 1662476769199)
+@@ -25,59 +25,70 @@
+     instant_regret_rew = []
+     instant_regret_obs = []
+ 
+-    for t in range(4):
+-        arm = [t, t, t, t, t]
+-        alpha_ratio = env1.alpha_ratio_otd()
+-        data = env1.round_single_day(daily_user, alpha_ratio, arm, class_probability)
+-        cr_data = conv_data(data)
+-        ar_data = alpha_data(data)
+-        q_data = quantity_data(data)
+-        learner.update(arm, cr_data, ar_data, q_data)
++    N_experiments = 10
++
++    R = []
++    for n in range(N_experiments):
++        instant_regret_rew = []
++        instant_regret_obs = []
++        learner.reset()
++        for t in range(4):
++            arm = [t, t, t, t, t]
++            alpha_ratio = env1.alpha_ratio_otd()
++            data = env1.round_single_day(daily_user, alpha_ratio, arm, class_probability)
++            cr_data = conv_data(data)
++            ar_data = alpha_data(data)
++            q_data = quantity_data(data)
++            learner.update(arm, cr_data, ar_data, q_data)
+ 
+-        act_rate = MC_simulation(model, real_conv_rates[range(5), arm], 5)
+-        rew = return_reward(model, prices[range(5), arm], real_conv_rates[range(5), arm], act_rate,
+-                            model['real_alpha_ratio'], model['real_quantity'])
++            act_rate = MC_simulation(model, real_conv_rates[range(5), arm], 5)
++            rew = return_reward(model, prices[range(5), arm], real_conv_rates[range(5), arm], act_rate,
++                                model['real_alpha_ratio'], model['real_quantity'])
+ 
+-        obs_reward = 0
+-        if len(data):
+-            for i_ in range(len(data)):
+-                obs_reward += np.sum(data[i_][0])
++            obs_reward = 0
++            if len(data):
++                for i_ in range(len(data)):
++                    obs_reward += np.sum(data[i_][0])
+ 
+-            obs_reward /= len(data)
++                obs_reward /= len(data)
+ 
+-        print("Pulled_arm: ", arm)
++            print("Pulled_arm: ", arm)
+ 
+-        instant_regret_rew.append(optimal_reward - rew)
+-        instant_regret_obs.append(optimal_reward - obs_reward)
+-        print("Time: ", t)
++            instant_regret_rew.append(optimal_reward - rew)
++            instant_regret_obs.append(optimal_reward - obs_reward)
++            print("Time: ", t)
+ 
+-    for t in range(T):
+-        pulled_arm = learner.act()
+-        alpha_ratio = env1.alpha_ratio_otd()
+-        data = env1.round_single_day(daily_user, alpha_ratio, pulled_arm, class_probability)
+-        cr_data = conv_data(data)
+-        ar_data = alpha_data(data)
+-        q_data = quantity_data(data)
+-        learner.update(pulled_arm, cr_data, ar_data, q_data)
++        for t in range(T):
++            pulled_arm = learner.act()
++            alpha_ratio = env1.alpha_ratio_otd()
++            data = env1.round_single_day(daily_user, alpha_ratio, pulled_arm, class_probability)
++            cr_data = conv_data(data)
++            ar_data = alpha_data(data)
++            q_data = quantity_data(data)
++            learner.update(pulled_arm, cr_data, ar_data, q_data)
+ 
+-        act_rate = MC_simulation(model, real_conv_rates[range(5), pulled_arm], 5)
+-        rew = return_reward(model, prices[range(5), pulled_arm], real_conv_rates[range(5), pulled_arm], act_rate,
+-                            model['real_alpha_ratio'], model['real_quantity'])
++            act_rate = MC_simulation(model, real_conv_rates[range(5), pulled_arm], 5)
++            rew = return_reward(model, prices[range(5), pulled_arm], real_conv_rates[range(5), pulled_arm], act_rate,
++                                model['real_alpha_ratio'], model['real_quantity'])
+ 
+-        obs_reward = 0
+-        if len(data):
+-            for i in range(len(data)):
+-                obs_reward += np.sum(data[i][0])
++            obs_reward = 0
++            if len(data):
++                for i in range(len(data)):
++                    obs_reward += np.sum(data[i][0])
+ 
+-            obs_reward /= len(data)
++                obs_reward /= len(data)
+ 
+-        print("Pulled_arm: ", pulled_arm)
++            print("Pulled_arm: ", pulled_arm)
+ 
+-        instant_regret_rew.append(optimal_reward - rew)
+-        instant_regret_obs.append(optimal_reward - obs_reward)
+-        print("Time: ", t+4)
++            instant_regret_rew.append(optimal_reward - rew)
++            instant_regret_obs.append(optimal_reward - obs_reward)
++            print("Time: ", t+4)
++        cum_regret_rew = np.cumsum(instant_regret_rew)
++        cum_regret_obs = np.cumsum(instant_regret_obs)
++        R.append(cum_regret_obs)
+ 
+-    show_results(instant_regret_rew, instant_regret_obs, "UCB test, second case")
++
++    show_results(cum_regret_rew, R, "UCB test, first case")
+ 
+ 
+ main()
+Index: OLA-Project/UCBLearner1.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from Learner import Learner\r\nfrom GreedyAlgorithm import *\r\nimport numpy as np\r\n\r\n\r\nclass UCBLearner1(Learner):\r\n    def __init__(self, model):\r\n        super().__init__(model)\r\n        self.cr_means = np.zeros(\r\n            (self.n_prod, self.n_price))  # means of the conversion rate for each product at each price\r\n        self.conv_widths = np.array([[np.inf for _ in range(self.n_price)] for _ in range(\r\n            self.n_prod)])  # width for each product and each price, initialized at +inf to explore all arms first\r\n        self.prices = model[\"prices\"]\r\n        self.model['cr_means'] = self.cr_means  # save conversion rates means in the model\r\n        self.model['ucb_cr'] = self.cr_means + self.conv_widths  # save conversion rates means + widths in the model\r\n        self.n_prod_price = np.zeros(\r\n            (self.n_prod, self.n_price))  # counts number of times a price has been selected for a product\r\n\r\n    def act(self):  # select the arm which has the highest upper confidence bound\r\n        arm_pulled = optimization_algorithm(self.model, False, rates=\"ucb_cr\")\r\n        return arm_pulled\r\n\r\n    def update(self, arm_pulled, conv_data):\r\n        super().update(arm_pulled, conv_data)\r\n        for i in range(self.n_prod):\r\n            self.cr_means[i, arm_pulled[i]] = np.mean(\r\n                self.reward_per_prod_price[i][\r\n                    arm_pulled[i]])  # update the mean of conversion rate of the arm that we pulled\r\n            self.n_prod_price[\r\n                i, arm_pulled[i]] += len(conv_data[i])  # TODO: += len(conv_data[i]) o t? con len(conv_data[i]) sembra meglio\r\n\r\n        for i in range(self.n_prod):\r\n            for j in range(self.n_price):  # update the confidence bound for all arm\r\n                n = self.n_prod_price[i, j]\r\n                if n > 0:\r\n                    self.conv_widths[i, j] = np.sqrt(\r\n                        2 * np.log(self.t) / n)  # TODO: log(t) o log(t) * daily_users?\r\n                else:\r\n                    self.conv_widths[i, j] = np.inf\r\n\r\n        self.model['ucb_cr'] = self.cr_means + self.conv_widths\r\n        self.model['cr_means'] = self.cr_means\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/OLA-Project/UCBLearner1.py b/OLA-Project/UCBLearner1.py
+--- a/OLA-Project/UCBLearner1.py	(revision 4dbbca9f6e95f77127e6a60a14479aedb5c5c648)
++++ b/OLA-Project/UCBLearner1.py	(date 1662476769205)
+@@ -16,6 +16,10 @@
+         self.n_prod_price = np.zeros(
+             (self.n_prod, self.n_price))  # counts number of times a price has been selected for a product
+ 
++
++    def reset(self):
++        self.__init__(self.model)
++
+     def act(self):  # select the arm which has the highest upper confidence bound
+         arm_pulled = optimization_algorithm(self.model, False, rates="ucb_cr")
+         return arm_pulled
+Index: OLA-Project/UCBLearner2.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from Learner import Learner\r\nfrom GreedyAlgorithm import *\r\nimport numpy as np\r\n\r\n\r\nclass UCBLearner2(Learner):\r\n    def __init__(self, model):\r\n        super().__init__(model)\r\n        self.cr_means = np.zeros(\r\n            (self.n_prod, self.n_price))  # means of the conversion rate for each product at each price\r\n        self.conv_widths = np.array([[np.inf for _ in range(self.n_price)] for _ in range(\r\n            self.n_prod)])  # width for each product and each price, initialized at +inf to explore all arms first\r\n        self.alpha_means = np.zeros(self.n_prod+1)  # means of the alpha ratio for each product\r\n        #self.alpha_widths = np.array([np.inf for _ in range(self.n_prod)])  # width for each product, initialized at +inf to explore all arms first\r\n        self.quantity_mean = 0  # means of the alpha ratio for each product\r\n        #self.quantity_width = np.inf  # width of the quantity\r\n\r\n        self.prices = model[\"prices\"]\r\n\r\n        self.model['cr_means'] = self.cr_means  # save conversion rates means in the model\r\n        self.model['ucb_cr'] = self.cr_means + self.conv_widths  # save conversion rates means + widths in the model\r\n        self.model['alpha_means'] = self.alpha_means\r\n        self.model['quantity_mean'] = self.quantity_mean\r\n        self.n_prod_price = np.zeros(\r\n            (self.n_prod, self.n_price))  # counts number of times a price has been selected for a product\r\n\r\n    def act(self):  # select the arm which has the highest upper confidence bound\r\n        arm_pulled = optimization_algorithm(self.model, False, rates=\"ucb_cr\", alphas=\"alpha_means\", quantity=\"quantity_mean\")\r\n        return arm_pulled\r\n\r\n    def update(self, arm_pulled, conv_data, alpha_data, quantity_data):\r\n        super().update2(arm_pulled, conv_data, alpha_data, quantity_data)\r\n\r\n        for i in range(self.n_prod):\r\n            self.cr_means[i, arm_pulled[i]] = np.mean(\r\n                self.reward_per_prod_price[i][\r\n                    arm_pulled[i]])  # update the mean of conversion rate of the arm that we pulled\r\n            self.n_prod_price[\r\n                i, arm_pulled[i]] += len(conv_data[i])  # TODO: += len(conv_data[i]) o t? con len(conv_data[i]) sembra meglio\r\n\r\n        for i in range(self.n_prod):\r\n            for j in range(self.n_price):  # update the confidence bound for all arm\r\n                n = self.n_prod_price[i, j]\r\n                if n > 0:\r\n                    self.conv_widths[i, j] = np.sqrt(\r\n                        2 * np.log(self.t) / n)  # TODO: log(t) o log(t) * daily_users?\r\n                else:\r\n                    self.conv_widths[i, j] = np.inf\r\n\r\n        self.model['ucb_cr'] = self.cr_means + self.conv_widths\r\n        self.model['cr_means'] = self.cr_means\r\n\r\n        for i in range(self.n_prod+1):\r\n            self.alpha_means[i] = np.mean(self.reward_per_prod_alpha[i])\r\n\r\n        self.quantity_mean = np.mean(self.reward_per_quantity)\r\n\r\n        self.model['alpha_means'] = self.alpha_means\r\n        self.model['quantity_mean'] = self.quantity_mean\r\n\r\n    def printq(self):\r\n        print(self.quantity_mean)\r\n\r\n    def printalpha(self):\r\n        print(self.alpha_means)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/OLA-Project/UCBLearner2.py b/OLA-Project/UCBLearner2.py
+--- a/OLA-Project/UCBLearner2.py	(revision 4dbbca9f6e95f77127e6a60a14479aedb5c5c648)
++++ b/OLA-Project/UCBLearner2.py	(date 1662476769212)
+@@ -24,6 +24,8 @@
+         self.n_prod_price = np.zeros(
+             (self.n_prod, self.n_price))  # counts number of times a price has been selected for a product
+ 
++        self.model_0 = model.copy()
++
+     def act(self):  # select the arm which has the highest upper confidence bound
+         arm_pulled = optimization_algorithm(self.model, False, rates="ucb_cr", alphas="alpha_means", quantity="quantity_mean")
+         return arm_pulled
+Index: OLA-Project/ucb_test3.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from UCBLearner3 import *\r\nimport numpy as np\r\nimport matplotlib.pyplot as plt\r\nfrom GenerateEnvironment import *\r\n\r\n\r\ndef main():\r\n    env1, model, class_probability = generate_environment()\r\n    real_conv_rates = model[\"real_conversion_rates\"]\r\n    prices = model[\"prices\"]\r\n\r\n    T = 100 - 4\r\n    daily_user = 2000\r\n\r\n    optimal_arm = optimization_algorithm(model, False)  # pull the optimal arm\r\n    print(\"Optimal_arm: \", optimal_arm)\r\n\r\n    optimal_act_rate = MC_simulation(model, real_conv_rates[range(5), optimal_arm], 5, 10000)\r\n\r\n    optimal_reward = return_reward(model, prices[range(5), optimal_arm],\r\n                                   real_conv_rates[range(5), optimal_arm], optimal_act_rate, model['real_alpha_ratio'], model['real_quantity'])\r\n    print(\"Optimal reward: \", optimal_reward)\r\n\r\n    learner = UCBLearner3(model)\r\n    instant_regret_rew = []\r\n    instant_regret_obs = []\r\n\r\n    for t in range(4):\r\n        arm = [t, t, t, t, t]\r\n        alpha_ratio = env1.alpha_ratio_otd()\r\n        data = env1.round_single_day(daily_user, alpha_ratio, arm, class_probability)\r\n        cr_data = conv_data(data)\r\n        cl_data = clicks_data(data)\r\n        learner.update(arm, cr_data, cl_data)\r\n\r\n        act_rate = MC_simulation(model, real_conv_rates[range(5), arm], 5)\r\n        rew = return_reward(model, prices[range(5), arm], real_conv_rates[range(5), arm], act_rate, model['real_alpha_ratio'], model['real_quantity'])\r\n\r\n        obs_reward = 0\r\n        if len(data):\r\n            for i_ in range(len(data)):\r\n                obs_reward += np.sum(data[i_][0])\r\n\r\n            obs_reward /= len(data)\r\n\r\n        print(\"Pulled_arm: \", arm)\r\n\r\n        instant_regret_rew.append(optimal_reward - rew)\r\n        instant_regret_obs.append(optimal_reward - obs_reward)\r\n        print(\"Time: \", t)\r\n\r\n    for t in range(T):\r\n        pulled_arm = learner.act()\r\n        alpha_ratio = env1.alpha_ratio_otd()\r\n        data = env1.round_single_day(daily_user, alpha_ratio, pulled_arm, class_probability)\r\n        cr_data = conv_data(data)\r\n        cl_data = clicks_data(data)\r\n        learner.update(pulled_arm, cr_data, cl_data)\r\n\r\n        act_rate = MC_simulation(model, real_conv_rates[range(5), pulled_arm], 5)\r\n        rew = return_reward(model, prices[range(5), pulled_arm], real_conv_rates[range(5), pulled_arm], act_rate,\r\n                            model['real_alpha_ratio'], model['real_quantity'])\r\n\r\n        obs_reward = 0\r\n        if len(data):\r\n            for i in range(len(data)):\r\n                obs_reward += np.sum(data[i][0])\r\n\r\n            obs_reward /= len(data)\r\n\r\n        print(\"Pulled_arm: \", pulled_arm)\r\n\r\n        instant_regret_rew.append(optimal_reward - rew)\r\n        instant_regret_obs.append(optimal_reward - obs_reward)\r\n        print(\"Time: \", t+4)\r\n\r\n    show_results(instant_regret_rew, instant_regret_obs, \"UCB test, third case\")\r\n\r\n\r\nmain()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/OLA-Project/ucb_test3.py b/OLA-Project/ucb_test3.py
+--- a/OLA-Project/ucb_test3.py	(revision 4dbbca9f6e95f77127e6a60a14479aedb5c5c648)
++++ b/OLA-Project/ucb_test3.py	(date 1662476769221)
+@@ -9,8 +9,8 @@
+     real_conv_rates = model["real_conversion_rates"]
+     prices = model["prices"]
+ 
+-    T = 100 - 4
+-    daily_user = 2000
++    T = 10 - 4
++    daily_user = 100
+ 
+     optimal_arm = optimization_algorithm(model, False)  # pull the optimal arm
+     print("Optimal_arm: ", optimal_arm)
+@@ -25,56 +25,68 @@
+     instant_regret_rew = []
+     instant_regret_obs = []
+ 
+-    for t in range(4):
+-        arm = [t, t, t, t, t]
+-        alpha_ratio = env1.alpha_ratio_otd()
+-        data = env1.round_single_day(daily_user, alpha_ratio, arm, class_probability)
+-        cr_data = conv_data(data)
+-        cl_data = clicks_data(data)
+-        learner.update(arm, cr_data, cl_data)
++    N_experiments = 10
++
++    R = []
++
++    for n in range(N_experiments):
++        instant_regret_rew = []
++        instant_regret_obs = []
++        learner.reset()
++        for t in range(4):
++            arm = [t, t, t, t, t]
++            alpha_ratio = env1.alpha_ratio_otd()
++            data = env1.round_single_day(daily_user, alpha_ratio, arm, class_probability)
++            cr_data = conv_data(data)
++            cl_data = clicks_data(data)
++            learner.update(arm, cr_data, cl_data)
+ 
+-        act_rate = MC_simulation(model, real_conv_rates[range(5), arm], 5)
+-        rew = return_reward(model, prices[range(5), arm], real_conv_rates[range(5), arm], act_rate, model['real_alpha_ratio'], model['real_quantity'])
++            act_rate = MC_simulation(model, real_conv_rates[range(5), arm], 5)
++            rew = return_reward(model, prices[range(5), arm], real_conv_rates[range(5), arm], act_rate, model['real_alpha_ratio'], model['real_quantity'])
+ 
+-        obs_reward = 0
+-        if len(data):
+-            for i_ in range(len(data)):
+-                obs_reward += np.sum(data[i_][0])
++            obs_reward = 0
++            if len(data):
++                for i_ in range(len(data)):
++                    obs_reward += np.sum(data[i_][0])
+ 
+-            obs_reward /= len(data)
++                obs_reward /= len(data)
+ 
+-        print("Pulled_arm: ", arm)
++            print("Pulled_arm: ", arm)
+ 
+-        instant_regret_rew.append(optimal_reward - rew)
+-        instant_regret_obs.append(optimal_reward - obs_reward)
+-        print("Time: ", t)
++            instant_regret_rew.append(optimal_reward - rew)
++            instant_regret_obs.append(optimal_reward - obs_reward)
++            print("Time: ", t)
+ 
+-    for t in range(T):
+-        pulled_arm = learner.act()
+-        alpha_ratio = env1.alpha_ratio_otd()
+-        data = env1.round_single_day(daily_user, alpha_ratio, pulled_arm, class_probability)
+-        cr_data = conv_data(data)
+-        cl_data = clicks_data(data)
+-        learner.update(pulled_arm, cr_data, cl_data)
++        for t in range(T):
++            pulled_arm = learner.act()
++            alpha_ratio = env1.alpha_ratio_otd()
++            data = env1.round_single_day(daily_user, alpha_ratio, pulled_arm, class_probability)
++            cr_data = conv_data(data)
++            cl_data = clicks_data(data)
++            learner.update(pulled_arm, cr_data, cl_data)
+ 
+-        act_rate = MC_simulation(model, real_conv_rates[range(5), pulled_arm], 5)
+-        rew = return_reward(model, prices[range(5), pulled_arm], real_conv_rates[range(5), pulled_arm], act_rate,
+-                            model['real_alpha_ratio'], model['real_quantity'])
++            act_rate = MC_simulation(model, real_conv_rates[range(5), pulled_arm], 5)
++            rew = return_reward(model, prices[range(5), pulled_arm], real_conv_rates[range(5), pulled_arm], act_rate,
++                                model['real_alpha_ratio'], model['real_quantity'])
+ 
+-        obs_reward = 0
+-        if len(data):
+-            for i in range(len(data)):
+-                obs_reward += np.sum(data[i][0])
++            obs_reward = 0
++            if len(data):
++                for i in range(len(data)):
++                    obs_reward += np.sum(data[i][0])
+ 
+-            obs_reward /= len(data)
++                obs_reward /= len(data)
+ 
+-        print("Pulled_arm: ", pulled_arm)
++            print("Pulled_arm: ", pulled_arm)
+ 
+-        instant_regret_rew.append(optimal_reward - rew)
+-        instant_regret_obs.append(optimal_reward - obs_reward)
+-        print("Time: ", t+4)
++            instant_regret_rew.append(optimal_reward - rew)
++            instant_regret_obs.append(optimal_reward - obs_reward)
++            print("Time: ", t+4)
++        cum_regret_rew = np.cumsum(instant_regret_rew)
++        cum_regret_obs = np.cumsum(instant_regret_obs)
++        R.append(cum_regret_obs)
+ 
+-    show_results(instant_regret_rew, instant_regret_obs, "UCB test, third case")
++
++    show_results(cum_regret_rew, R, "UCB test, third case")
+ 
+ 
+ main()
+Index: OLA-Project/GenerateEnvironment.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import numpy as np\r\nfrom EnvironmentPricing import *\r\nimport matplotlib.pyplot as plt\r\n\r\n\r\n\r\ndef generate_environment():\r\n    average = np.array([[9, 10, 7],\r\n                        [3, 3, 2],\r\n                        [4, 4, 5],\r\n                        [3, 3.5, 3],\r\n                        [1.5, 2, 2]])\r\n    variance = np.array([[1, 1, 1],\r\n                         [0.5, 0.5, 0.5],\r\n                         [0.5, 0.5, 0.5],\r\n                         [0.5, 0.5, 0.5],\r\n                         [0.5, 0.5, 0.5]])\r\n    prices = generate_prices(np.array([8, 3, 5, 4, 2]))\r\n    costs = np.array([1.6, 0.6, 1, 0.8, 0.4])\r\n    class_probability = np.array([0.4, 0.2, 0.4])\r\n    lambdas = np.array([1, 2, 3])\r\n    alphas_par = np.array([5, 1, 1, 1, 1, 1])\r\n    np.random.seed(7)\r\n    P = np.random.uniform(0.1, 0.5, size=(5, 5, 3))\r\n    secondary_products = np.array([[1, 4],\r\n                                   [0, 2],\r\n                                   [3, 0],\r\n                                   [2, 4],\r\n                                   [0, 1]])\r\n\r\n    env1 = EnvironmentPricing(average, variance, prices, costs, lambdas, alphas_par, P, secondary_products,\r\n                              lambda_secondary=0.5)\r\n\r\n    real_conv_rates = np.zeros((5, 4))\r\n\r\n    for i in range(3):\r\n        real_conv_rates += env1.get_real_conversion_rates(i) * class_probability[i]\r\n\r\n    model = {\"n_prod\": 5,\r\n             \"n_price\": 4,\r\n             \"prices\": prices,\r\n             \"cost\": costs,\r\n             \"real_alphas\": alphas_par,\r\n             \"real_alpha_ratio\": alphas_par / np.sum(alphas_par),\r\n             \"real_conversion_rates\": real_conv_rates,\r\n             \"real_quantity\": 3,\r\n             \"secondary_products\": secondary_products,\r\n             \"real_P\": P[:, :, 0] * class_probability[0] + P[:, :, 1] * class_probability[1] + P[:, :, 2] *\r\n                       class_probability[2],\r\n             \"lambda_secondary\": 0.5\r\n             }\r\n    return env1, model, class_probability\r\n\r\n\r\ndef generate_prices(product_prices):\r\n    prices = np.zeros((len(product_prices), 4))\r\n    changing = np.array([-0.6, -0.2, 0.2, 0.6])\r\n    for i in range(len(product_prices)):\r\n        prices[i, :] = np.ones(len(changing)) * product_prices[i] + np.ones(len(changing)) * product_prices[\r\n            i] * changing\r\n    return prices\r\n\r\n\r\n# Function that produces 0 1 from the data of the simulation of a day\r\ndef conv_data(data_):\r\n    result = [[] for _ in range(5)]\r\n    for i_ in range(len(data_)):\r\n        for j_ in range(5):\r\n            if data_[i_][4][j_]:\r\n                if data_[i_][1][j_] > 0:\r\n                    result[j_].append(1)\r\n                else:\r\n                    result[j_].append(0)\r\n    return result\r\n\r\n\r\n# Function that returns the data needed to estimate the alpha ratio values\r\ndef alpha_data(data_):\r\n    result = [[] for _ in range(6)]\r\n    for i_ in range(len(data_)):\r\n        for j_ in range(6):\r\n            if data_[i_][2] == j_ - 1:\r\n                result[j_].append(1)\r\n            else:\r\n                result[j_].append(0)\r\n    return result\r\n\r\n\r\n# Function that extract the values needed to estimate the expected mean value\r\ndef quantity_data(data_):\r\n    result = []\r\n    for i_ in range(len(data_)):\r\n        for j_ in range(5):\r\n            if data_[i_][5][j_]:\r\n                result.append(data_[i_][1][j_])\r\n    return result\r\n\r\n\r\n# Function that returns the data needed to estimate the click graph\r\ndef clicks_data(data_):\r\n    result = [[0 for _ in range(5)] for _ in range(5)]\r\n\r\n    for i in range(len(data_)):\r\n        for j in range(5):\r\n            for k in range(5):\r\n                result[j][k] += data_[i][6][j][k]\r\n\r\n    return result\r\n\r\ndef show_results(instant_regret_rew, instant_regret_obs, title):\r\n    cumulative_regret_rew = np.cumsum(instant_regret_rew)\r\n    cumulative_regret_obs = np.cumsum(instant_regret_obs)\r\n\r\n    plt.plot(cumulative_regret_rew, color='C1', label='Calculated')\r\n    plt.plot(cumulative_regret_obs, color='C3', label='Observed')\r\n    plt.title(title)\r\n    plt.legend()\r\n    plt.show()\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/OLA-Project/GenerateEnvironment.py b/OLA-Project/GenerateEnvironment.py
+--- a/OLA-Project/GenerateEnvironment.py	(revision 4dbbca9f6e95f77127e6a60a14479aedb5c5c648)
++++ b/OLA-Project/GenerateEnvironment.py	(date 1662476769227)
+@@ -107,12 +107,11 @@
+ 
+     return result
+ 
+-def show_results(instant_regret_rew, instant_regret_obs, title):
+-    cumulative_regret_rew = np.cumsum(instant_regret_rew)
+-    cumulative_regret_obs = np.cumsum(instant_regret_obs)
++def show_results(cumulative_regret_rew, R, title):
++    mean_R = np.mean(R, axis=0)
+ 
+     plt.plot(cumulative_regret_rew, color='C1', label='Calculated')
+-    plt.plot(cumulative_regret_obs, color='C3', label='Observed')
++    plt.plot(mean_R, color='C3', label='Observed')
+     plt.title(title)
+     plt.legend()
+     plt.show()
